@@ -1,0 +1,40 @@
+public class Employee {
+    private String employeeId;
+    private String firstName;
+    private String lastName;
+    private String department;
+    private double hourlyRate;
+
+    // CONSTRUCTOR: Initializes the employee and guards against bad data.
+    public Employee(String employeeId, String firstName, String lastName, String department, double hourlyRate) {
+        this.employeeId = employeeId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.department = department;
+        
+        // Bulletproof check: Hourly rate cannot be negative.
+        if (hourlyRate >= 0) {
+            this.hourlyRate = hourlyRate;
+        } else {
+            System.out.println("Warning: Invalid hourly rate. Setting to 0.0");
+            this.hourlyRate = 0.0;
+        }
+    }
+
+    // GETTER: Allows Payroll to access the rate safely.
+    public double getHourlyRate() {
+        return this.hourlyRate;
+    }
+
+    // BEHAVIORS: Actions the employee object can perform.
+    public void displayDetails() {
+        System.out.println("\n--- Employee Details ---");
+        System.out.println("ID: " + employeeId + " | Name: " + firstName + " " + lastName);
+        System.out.println("Department: " + department + " | Hourly Rate: PHP " + hourlyRate);
+    }
+
+    public void updateDepartment(String newDept) {
+        this.department = newDept;
+        System.out.println("Update: " + firstName + " moved to " + newDept + " department.");
+    }
+}

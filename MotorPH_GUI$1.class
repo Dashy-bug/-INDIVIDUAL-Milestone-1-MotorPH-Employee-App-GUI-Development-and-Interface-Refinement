@@ -1,0 +1,24 @@
+public class Main {
+    public static void main(String[] args) {
+        
+        // 1. Create the Employee
+        Employee emp = new Employee("EMP-001", "Crisostomo", "Ibarra", "Engineering", 550.00);
+        emp.displayDetails();
+
+        // 2. Track their Time
+        System.out.println("\n--- Tracking Time ---");
+        TimeRecord record = new TimeRecord("2023-10-25");
+        record.logTimeIn("08:00 AM");
+        record.logTimeOut("05:00 PM");
+        record.calculateDailyHours(8.5); // 8.5 hours worked
+
+        // 3. Process their Payroll (Connecting the modules)
+        Payroll payroll = new Payroll();
+        
+        // We pull the protected data using our Getter methods
+        double hours = record.getTotalHoursWorked();
+        double rate = emp.getHourlyRate();
+        
+        payroll.processFullPayroll(hours, rate);
+    }
+}

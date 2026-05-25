@@ -1,0 +1,49 @@
+public class Payroll {
+    private double grossSalary;
+    private double sssDeduction;
+    private double philHealthDeduction;
+    private double netSalary;
+
+    // CONSTRUCTOR
+    public Payroll() {
+        this.grossSalary = 0.0;
+        this.sssDeduction = 0.0;
+        this.philHealthDeduction = 0.0;
+        this.netSalary = 0.0;
+    }
+
+    // BEHAVIORS: The logical steps to process pay.
+    public void processFullPayroll(double hoursWorked, double hourlyRate) {
+        computeGrossPay(hoursWorked, hourlyRate);
+        computeSSS();
+        computePhilHealth();
+        computeNetPay();
+        generatePayslip();
+    }
+
+    private void computeGrossPay(double hoursWorked, double hourlyRate) {
+        this.grossSalary = hoursWorked * hourlyRate;
+    }
+
+    private void computeSSS() {
+        this.sssDeduction = this.grossSalary * 0.045; // 4.5% rate
+    }
+
+    private void computePhilHealth() {
+        this.philHealthDeduction = this.grossSalary * 0.04; // 4% rate
+    }
+
+    private void computeNetPay() {
+        this.netSalary = this.grossSalary - (this.sssDeduction + this.philHealthDeduction);
+    }
+
+    public void generatePayslip() {
+        System.out.println("\n========== PAYSLIP ==========");
+        System.out.printf("Gross Salary:       PHP %.2f\n", this.grossSalary);
+        System.out.printf("SSS Deduction:     -PHP %.2f\n", this.sssDeduction);
+        System.out.printf("PhilHealth Ded:    -PHP %.2f\n", this.philHealthDeduction);
+        System.out.println("-----------------------------");
+        System.out.printf("NET SALARY:         PHP %.2f\n", this.netSalary);
+        System.out.println("=============================\n");
+    }
+}

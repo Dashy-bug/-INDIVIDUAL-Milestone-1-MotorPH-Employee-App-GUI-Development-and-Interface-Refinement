@@ -1,0 +1,73 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class MotorPH_GUI {
+    
+    public static void main(String[] args) {
+        
+        // 1. Create the Main Window
+        JFrame frame = new JFrame("MotorPH Employee App");
+        frame.setSize(400, 300);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        // Use GridLayout to make a neat grid: 5 rows, 2 columns, 10px spacing
+        frame.setLayout(new GridLayout(5, 2, 10, 10)); 
+
+        // 2. Create the Labels (Text on the screen)
+        JLabel idLabel = new JLabel("   Employee Number:");
+        JLabel nameLabel = new JLabel("   Employee Name:");
+        JLabel coverageLabel = new JLabel("   Hours Worked:"); 
+        
+        // 3. Create the Text Fields (Where the user types)
+        JTextField idField = new JTextField();
+        JTextField nameField = new JTextField();
+        JTextField coverageField = new JTextField();
+
+        // 4. Create the Button and a place to show the final result
+        JButton calcButton = new JButton("Calculate");
+        JLabel resultLabel = new JLabel("   Result will appear here...");
+
+        // 5. Add everything to the window (Order matters in a GridLayout!)
+        frame.add(idLabel);
+        frame.add(idField);
+        
+        frame.add(nameLabel);
+        frame.add(nameField);
+        
+        frame.add(coverageLabel);
+        frame.add(coverageField);
+        
+        frame.add(new JLabel("")); // Blank space to push the button to the right
+        frame.add(calcButton);
+        
+        frame.add(new JLabel("")); // Blank space
+        frame.add(resultLabel);
+
+        // --- STEP 4 & 5: EVENT LISTENER AND EXCEPTION HANDLING ---
+        calcButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // TRY: Grab the inputs. We have to convert the hours text into a double (decimal).
+                    String name = nameField.getText();
+                    double hours = Double.parseDouble(coverageField.getText());
+                    
+                    // If the conversion worked, update the UI!
+                    // (Note: This is where you will eventually link your Payroll math class)
+                    resultLabel.setText("   Success! " + name + " logged " + hours + " hrs.");
+                    
+                    // Show a pop-up confirmation
+                    JOptionPane.showMessageDialog(frame, "Data submitted successfully for " + name);
+
+                } catch (NumberFormatException error) {
+                    // CATCH: If they typed letters (like "eight") instead of numbers, intercept the crash!
+                    JOptionPane.showMessageDialog(frame, "Oops! Please enter a valid number for Hours Worked.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        // 6. Turn the lights on
+        frame.setVisible(true);
+    }
+}
