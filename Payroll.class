@@ -1,73 +1,55 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+public class Payroll {
+    private double grossSalary;
+    private double sssDeduction;
+    private double philHealthDeduction;
+    private double netSalary;
 
-public class MotorPH_GUI {
-    
-    public static void main(String[] args) {
-        
-        // 1. Create the Main Window
-        JFrame frame = new JFrame("MotorPH Employee App");
-        frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        // Use GridLayout to make a neat grid: 5 rows, 2 columns, 10px spacing
-        frame.setLayout(new GridLayout(5, 2, 10, 10)); 
-
-        // 2. Create the Labels (Text on the screen)
-        JLabel idLabel = new JLabel("   Employee Number:");
-        JLabel nameLabel = new JLabel("   Employee Name:");
-        JLabel coverageLabel = new JLabel("   Hours Worked:"); 
-        
-        // 3. Create the Text Fields (Where the user types)
-        JTextField idField = new JTextField();
-        JTextField nameField = new JTextField();
-        JTextField coverageField = new JTextField();
-
-        // 4. Create the Button and a place to show the final result
-        JButton calcButton = new JButton("Calculate");
-        JLabel resultLabel = new JLabel("   Result will appear here...");
-
-        // 5. Add everything to the window (Order matters in a GridLayout!)
-        frame.add(idLabel);
-        frame.add(idField);
-        
-        frame.add(nameLabel);
-        frame.add(nameField);
-        
-        frame.add(coverageLabel);
-        frame.add(coverageField);
-        
-        frame.add(new JLabel("")); // Blank space to push the button to the right
-        frame.add(calcButton);
-        
-        frame.add(new JLabel("")); // Blank space
-        frame.add(resultLabel);
-
-        // --- STEP 4 & 5: EVENT LISTENER AND EXCEPTION HANDLING ---
-        calcButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // TRY: Grab the inputs. We have to convert the hours text into a double (decimal).
-                    String name = nameField.getText();
-                    double hours = Double.parseDouble(coverageField.getText());
-                    
-                    // If the conversion worked, update the UI!
-                    // (Note: This is where you will eventually link your Payroll math class)
-                    resultLabel.setText("   Success! " + name + " logged " + hours + " hrs.");
-                    
-                    // Show a pop-up confirmation
-                    JOptionPane.showMessageDialog(frame, "Data submitted successfully for " + name);
-
-                } catch (NumberFormatException error) {
-                    // CATCH: If they typed letters (like "eight") instead of numbers, intercept the crash!
-                    JOptionPane.showMessageDialog(frame, "Oops! Please enter a valid number for Hours Worked.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        // 6. Turn the lights on
-        frame.setVisible(true);
+    // CONSTRUCTOR
+    public Payroll() {
+        this.grossSalary = 0.0;
+        this.sssDeduction = 0.0;
+        this.philHealthDeduction = 0.0;
+        this.netSalary = 0.0;
     }
+
+    // BEHAVIORS: The logical steps to process pay.
+    public void processFullPayroll(double hoursWorked, double hourlyRate) {
+        computeGrossPay(hoursWorked, hourlyRate);
+        computeSSS();
+        computePhilHealth();
+        computeNetPay();
+        generatePayslip();
+    }
+
+    private void computeGrossPay(double hoursWorked, double hourlyRate) {
+        this.grossSalary = hoursWorked * hourlyRate;
+    }
+
+    private void computeSSS() {
+        this.sssDeduction = this.grossSalary * 0.045; // 4.5% rate
+    }
+
+    private void computePhilHealth() {
+        this.philHealthDeduction = this.grossSalary * 0.04; // 4% rate
+    }
+
+    private void computeNetPay() {
+        this.netSalary = this.grossSalary - (this.sssDeduction + this.philHealthDeduction);
+    }
+
+    public void generatePayslip() {
+        System.out.println("\n========== PAYSLIP ==========");
+        System.out.printf("Gross Salary:       PHP %.2f\n", this.grossSalary);
+        System.out.printf("SSS Deduction:     -PHP %.2f\n", this.sssDeduction);
+        System.out.printf("PhilHealth Ded:    -PHP %.2f\n", this.philHealthDeduction);
+        System.out.println("-----------------------------");
+        System.out.printf("NET SALARY:         PHP %.2f\n", this.netSalary);
+        System.out.println("=============================\n");
+    }
+    // GETTERS: Allows the GUI to grab the computed numbers
+    public double getGrossSalary() { return this.grossSalary; }
+    public double getSssDeduction() { return this.sssDeduction; }
+    public double getPhilHealthDeduction() { return this.philHealthDeduction; }
+    public double getNetSalary() { return this.netSalary; }
+}
 }
