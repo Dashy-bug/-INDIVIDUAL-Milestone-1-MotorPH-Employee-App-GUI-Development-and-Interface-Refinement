@@ -1,49 +1,47 @@
-public class Payroll {
-    private double grossSalary;
-    private double sssDeduction;
-    private double philHealthDeduction;
-    private double netSalary;
+public class TimeRecord {
+    private String date;
+    private String timeIn;
+    private String timeOut;
+    private double totalHoursWorked;
 
     // CONSTRUCTOR
-    public Payroll() {
-        this.grossSalary = 0.0;
-        this.sssDeduction = 0.0;
-        this.philHealthDeduction = 0.0;
-        this.netSalary = 0.0;
+    public TimeRecord(String date) {
+        this.date = date;
+        this.totalHoursWorked = 0.0;
     }
 
-    // BEHAVIORS: The logical steps to process pay.
-    public void processFullPayroll(double hoursWorked, double hourlyRate) {
-        computeGrossPay(hoursWorked, hourlyRate);
-        computeSSS();
-        computePhilHealth();
-        computeNetPay();
-        generatePayslip();
+    // GETTER: Allows Payroll to access hours worked.
+    public double getTotalHoursWorked() {
+        return this.totalHoursWorked;
     }
 
-    private void computeGrossPay(double hoursWorked, double hourlyRate) {
-        this.grossSalary = hoursWorked * hourlyRate;
+    // BEHAVIORS
+    public void logTimeIn(String time) {
+        this.timeIn = time;
+        System.out.println("Time In  (" + date + "): " + time);
     }
 
-    private void computeSSS() {
-        this.sssDeduction = this.grossSalary * 0.045; // 4.5% rate
+    public void logTimeOut(String time) {
+        this.timeOut = time;
+        System.out.println("Time Out (" + date + "): " + time);
     }
 
-    private void computePhilHealth() {
-        this.philHealthDeduction = this.grossSalary * 0.04; // 4% rate
+    public void calculateDailyHours(double hours) {
+        // Bulletproof check: You cannot work negative hours.
+        if (hours >= 0) {
+            this.totalHoursWorked = hours;
+        } else {
+            System.out.println("Warning: Invalid hours entered. Setting to 0.");
+            this.totalHoursWorked = 0.0;
+        }
     }
+    public String getTimeOut() {
+    return timeOut;
+    
+}
+    public String getTimeIn() {
+    return timeIn;
+}
+}
 
-    private void computeNetPay() {
-        this.netSalary = this.grossSalary - (this.sssDeduction + this.philHealthDeduction);
-    }
-
-    public void generatePayslip() {
-        System.out.println("\n========== PAYSLIP ==========");
-        System.out.printf("Gross Salary:       PHP %.2f\n", this.grossSalary);
-        System.out.printf("SSS Deduction:     -PHP %.2f\n", this.sssDeduction);
-        System.out.printf("PhilHealth Ded:    -PHP %.2f\n", this.philHealthDeduction);
-        System.out.println("-----------------------------");
-        System.out.printf("NET SALARY:         PHP %.2f\n", this.netSalary);
-        System.out.println("=============================\n");
-    }
 }
