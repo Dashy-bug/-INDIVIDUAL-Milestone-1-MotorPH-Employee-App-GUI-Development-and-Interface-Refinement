@@ -1,24 +1,200 @@
-public class Main {
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+
+public class MotorPH_GUI {
+    // Core GUI Components
+    private static JFrame frame;
+    private static JTable table;
+    private static DefaultTableModel tableModel;
+    private static final String FILE_NAME = "motorph_employees.csv";
+
     public static void main(String[] args) {
-        
-        // 1. Create the Employee
-        Employee emp = new Employee("EMP-001", "Crisostomo", "Ibarra", "Engineering", 550.00);
-        emp.displayDetails();
+        frame = new JFrame("MotorPH Employee App - Milestone 2");
+        frame.setSize(900, 600);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout(10, 10));
 
-        // 2. Track their Time
-        System.out.println("\n--- Tracking Time ---");
-        TimeRecord record = new TimeRecord("2023-10-25");
-        record.logTimeIn("08:00 AM");
-        record.logTimeOut("05:00 PM");
-        record.calculateDailyHours(8.5); // 8.5 hours worked
+        // --- 1. TOP PANEL: Input Fields ---
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // 3. Process their Payroll (Connecting the modules)
-        Payroll payroll = new Payroll();
+        JTextField idField = new JTextField();
+        JTextField fNameField = new JTextField();
+        JTextField lNameField = new JTextField();
+        JTextField deptField = new JTextField();
+        JTextField rateField = new JTextField();
+        JTextField hoursField = new JTextField();
+
+        inputPanel.add(new JLabel("Employee ID:")); inputPanel.add(idField);
+        inputPanel.add(new JLabel("First Name:"));  inputPanel.add(fNameField);
+        inputPanel.add(new JLabel("Last Name:"));   inputPanel.add(lNameField);
+        inputPanel.add(new JLabel("Department:"));  inputPanel.add(deptField);
+        inputPanel.add(new JLabel("Hourly Rate:")); inputPanel.add(rateField);
+        inputPanel.add(new JLabel("Hours Worked:"));inputPanel.add(hoursField);
+
+        // --- 2. CENTER PANEL: The Data Table ---
+        String[] columns = {"ID", "First Name", "Last Name", "Dept", "Rate", "Hours", "Gross Pay", "Deductions", "Net Pay"};
+        tableModel = new DefaultTableModel(columns, 0);
+        table = new JTable(tableModel);
+        JScrollPane scrollPane = new JScrollPane(table);
+
+        // Load existing CSV data when the app opens
+        loadDataFromCSV();
+
+        // --- 3. BOTTOM PANEL: Action Buttons ---
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        JButton addButton = new JButton("Add & Compute");
+        JButton updateButton = new JButton("Update Selected");
+        JButton deleteButton = new JButton("Delete Selected");
         
-        // We pull the protected data using our Getter methods
-        double hours = record.getTotalHoursWorked();
-        double rate = emp.getHourlyRate();
+        buttonPanel.add(addButton);
+        buttonPanel.add(updateButton);
+        buttonPanel.add(deleteButton);
+
+        // --- EVENT HANDLING LOGIC ---
+
+        // ADD BUTTON
+        addButton.addActionListener(e -> {
+            if (idField.getText().isEmpty() || fNameField.getText().isEmpty() || rateField.getText().isEmpty() || hoursField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Please fill in all required fields.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                // Read Inputs
+                String id = idField.getText();
+                String fName = fNameField.getText();
+                String lName = lNameField.getText();
+                String dept = deptField.getText();
+                double rate = Double.parseDouble(rateField.getText());
+                double hours = Double.parseDouble(hoursField.getText());
+
+                // USE YOUR CUSTOM BACKEND CLASSES
+                Employee emp = new Employee(id, fName, lName, dept, rate);
+                Payroll pay = new Payroll();
+                pay.processFullPayroll(hours, emp.getHourlyRate());
+
+                double totalDeductions = pay.getSssDeduction() + pay.getPhilHealthDeduction();
+
+                // Add data to the GUI Table
+                tableModel.addRow(new Object[]{
+                    id, fName, lName, dept, emp.getHourlyRate(), hours, 
+                    pay.getGrossSalary(), totalDeductions, pay.getNetSalary()
+                });
+
+                saveDataToCSV(); // Save to file
+                clearFields(idField, fNameField, lNameField, deptField, rateField, hoursField);
+                JOptionPane.showMessageDialog(frame, "Record Added Successfully!");
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(frame, "Rate and Hours must be valid numbers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // DELETE BUTTON
+        deleteButton.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow >= 0) {
+                tableModel.removeRow(selectedRow);
+                saveDataToCSV(); // Update file
+                JOptionPane.showMessageDialog(frame, "Record Deleted!");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a row to delete.");
+            }
+        });
+
+        // UPDATE BUTTON
+        updateButton.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow >= 0) {
+                try {
+                    // Overwrite the table with new text box inputs
+                    tableModel.setValueAt(idField.getText(), selectedRow, 0);
+                    tableModel.setValueAt(fNameField.getText(), selectedRow, 1);
+                    tableModel.setValueAt(lNameField.getText(), selectedRow, 2);
+                    tableModel.setValueAt(deptField.getText(), selectedRow, 3);
+                    tableModel.setValueAt(rateField.getText(), selectedRow, 4);
+                    tableModel.setValueAt(hoursField.getText(), selectedRow, 5);
+                    
+                    // Recompute Payroll
+                    double rate = Double.parseDouble(rateField.getText());
+                    double hours = Double.parseDouble(hoursField.getText());
+                    Payroll pay = new Payroll();
+                    pay.processFullPayroll(hours, rate);
+                    
+                    double totalDeductions = pay.getSssDeduction() + pay.getPhilHealthDeduction();
+                    tableModel.setValueAt(pay.getGrossSalary(), selectedRow, 6);
+                    tableModel.setValueAt(totalDeductions, selectedRow, 7);
+                    tableModel.setValueAt(pay.getNetSalary(), selectedRow, 8);
+
+                    saveDataToCSV();
+                    clearFields(idField, fNameField, lNameField, deptField, rateField, hoursField);
+                    JOptionPane.showMessageDialog(frame, "Record Updated!");
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, "Invalid data format for update.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a row to update.");
+            }
+        });
+
+        // Auto-fill fields when a row is clicked (for easy updating)
+        table.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                int selectedRow = table.getSelectedRow();
+                idField.setText(tableModel.getValueAt(selectedRow, 0).toString());
+                fNameField.setText(tableModel.getValueAt(selectedRow, 1).toString());
+                lNameField.setText(tableModel.getValueAt(selectedRow, 2).toString());
+                deptField.setText(tableModel.getValueAt(selectedRow, 3).toString());
+                rateField.setText(tableModel.getValueAt(selectedRow, 4).toString());
+                hoursField.setText(tableModel.getValueAt(selectedRow, 5).toString());
+            }
+        });
+
+        // Add everything to the window
+        frame.add(inputPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+        frame.setVisible(true);
+    }
+
+    // --- FILE HANDLING METHODS ---
+
+    private static void saveDataToCSV() {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            for (int i = 0; i < tableModel.getRowCount(); i++) {
+                for (int j = 0; j < tableModel.getColumnCount(); j++) {
+                    bw.write(tableModel.getValueAt(i, j).toString() + (j < tableModel.getColumnCount() - 1 ? "," : ""));
+                }
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(frame, "Error saving to CSV.", "File Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void loadDataFromCSV() {
+        File file = new File(FILE_NAME);
+        if (!file.exists()) return; 
         
-        payroll.processFullPayroll(hours, rate);
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                if(data.length == 9) { // 9 columns
+                    tableModel.addRow(data);
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Could not load previous records.");
+        }
+    }
+
+    private static void clearFields(JTextField... fields) {
+        for (JTextField field : fields) {
+            field.setText("");
+        }
     }
 }
