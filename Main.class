@@ -1,40 +1,24 @@
-public class Employee {
-    private String employeeId;
-    private String firstName;
-    private String lastName;
-    private String department;
-    private double hourlyRate;
-
-    // CONSTRUCTOR: Initializes the employee and guards against bad data.
-    public Employee(String employeeId, String firstName, String lastName, String department, double hourlyRate) {
-        this.employeeId = employeeId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.department = department;
+public class Main {
+    public static void main(String[] args) {
         
-        // Bulletproof check: Hourly rate cannot be negative.
-        if (hourlyRate >= 0) {
-            this.hourlyRate = hourlyRate;
-        } else {
-            System.out.println("Warning: Invalid hourly rate. Setting to 0.0");
-            this.hourlyRate = 0.0;
-        }
-    }
+        // 1. Create the Employee
+        Employee emp = new Employee("EMP-001", "Crisostomo", "Ibarra", "Engineering", 550.00);
+        emp.displayDetails();
 
-    // GETTER: Allows Payroll to access the rate safely.
-    public double getHourlyRate() {
-        return this.hourlyRate;
-    }
+        // 2. Track their Time
+        System.out.println("\n--- Tracking Time ---");
+        TimeRecord record = new TimeRecord("2023-10-25");
+        record.logTimeIn("08:00 AM");
+        record.logTimeOut("05:00 PM");
+        record.calculateDailyHours(8.5); // 8.5 hours worked
 
-    // BEHAVIORS: Actions the employee object can perform.
-    public void displayDetails() {
-        System.out.println("\n--- Employee Details ---");
-        System.out.println("ID: " + employeeId + " | Name: " + firstName + " " + lastName);
-        System.out.println("Department: " + department + " | Hourly Rate: PHP " + hourlyRate);
-    }
-
-    public void updateDepartment(String newDept) {
-        this.department = newDept;
-        System.out.println("Update: " + firstName + " moved to " + newDept + " department.");
+        // 3. Process their Payroll (Connecting the modules)
+        Payroll payroll = new Payroll();
+        
+        // We pull the protected data using our Getter methods
+        double hours = record.getTotalHoursWorked();
+        double rate = emp.getHourlyRate();
+        
+        payroll.processFullPayroll(hours, rate);
     }
 }
